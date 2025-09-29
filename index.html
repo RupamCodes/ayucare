@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayurveda Diet Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .ayurveda-bg {
+            background-color: #FBF9F4; /* Off-white */
+        }
+        .ayurveda-primary {
+            background-color: #4A634D; /* Deep Green */
+        }
+        .ayurveda-primary-text {
+            color: #4A634D;
+        }
+        .ayurveda-accent {
+            background-color: #D4A373; /* Earthy Gold/Ochre */
+        }
+        .ayurveda-accent-text {
+            color: #D4A373;
+        }
+        .ayurveda-secondary {
+            background-color: #EFEBE5; /* Light Beige */
+        }
+        .ayurveda-text-dark {
+            color: #3D403A; /* Dark Brown/Grey */
+        }
+        .ayurveda-text-light {
+            color: #6B7280;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #EFEBE5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D4A373;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c59461;
+        }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .spinner {
+            border: 2px solid rgba(0,0,0,.1);
+            border-left-color: #fff;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .login-tab.active {
+            border-bottom-color: #4A634D;
+            color: #4A634D;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="ayurveda-bg">
+
+    <div id="app" class="max-w-md mx-auto min-h-screen shadow-2xl ayurveda-bg">
+
+        <!-- Screen: Login -->
+        <div id="login-screen" class="screen active fade-in">
+            <div class="flex flex-col h-screen justify-center p-8">
+                <div class="text-center mb-10">
+                    <h1 class="text-3xl font-bold ayurveda-primary-text">AyuCare</h1>
+                    <p class="text-ayurveda-text-light mt-1">Your Digital Wellness Partner</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex border-b mb-6">
+                        <button id="doctor-tab" class="login-tab active flex-1 py-2 text-center text-gray-500 border-b-2 border-transparent transition-colors">Doctor</button>
+                        <button id="patient-tab" class="login-tab flex-1 py-2 text-center text-gray-500 border-b-2 border-transparent transition-colors">Patient</button>
+                    </div>
+                    
+                    <div id="login-forms">
+                        <!-- Doctor Login Form -->
+                        <div id="doctor-login-form">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium ayurveda-text-dark mb-1" for="doctor-email">Email</label>
+                                <input type="email" id="doctor-email" value="doctor@ayucare.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ayurveda-accent">
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium ayurveda-text-dark mb-1" for="doctor-password">Password</label>
+                                <input type="password" id="doctor-password" value="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ayurveda-accent">
+                            </div>
+                            <button id="doctor-login-btn" class="w-full ayurveda-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:opacity-90 transition-opacity">
+                                Login as Doctor
+                            </button>
+                        </div>
+
+                        <!-- Patient Login Form -->
+                        <div id="patient-login-form" class="hidden">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium ayurveda-text-dark mb-1" for="patient-email">Email</label>
+                                <input type="email" id="patient-email" value="ananya@email.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ayurveda-accent">
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium ayurveda-text-dark mb-1" for="patient-password">Password</label>
+                                <input type="password" id="patient-password" value="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ayurveda-accent">
+                            </div>
+                            <button id="patient-login-btn" class="w-full ayurveda-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:opacity-90 transition-opacity">
+                                Login as Patient
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="register-forms" class="hidden">
+                         <!-- Doctor Register Form -->
+                        <div id="doctor-register-form" class="hidden">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium ayurveda-text-dark mb-1" for="doctor-reg-name">Full Name</label>
+                                <input type="text" id="doctor-reg-name" placeholder="Dr. John Doe" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ayurveda-accent">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium ayurveda-text-dark mb-1" for="doctor-reg-email">Email</label>
+                                <input type="email" id="doctor-reg-email" placeholder="you@example.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ayurveda-accent">
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium ayurveda-text-dark mb-1" for="doctor-reg-password">Password</label>
+                                <input type="password" id="doctor-reg-password" placeholder="••••••••" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ayurveda-accent">
+                            </div>
+                            <button id="doctor-register-btn" class="w-full ayurveda-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:opacity-90 transition-opacity">
+                                Register as Doctor
+                            </button>
+                        </div>
+                         <!-- Patient Register Form -->
+                        <div id="patient-register-form" class="hidden">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium ayurveda-text-dark mb-1" for="patient-reg-name">Full Name</label>
+                                <input type="text" id="patient-reg-name" placeholder="Jane Doe" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ayurveda-accent">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium ayurveda-text-dark mb-1" for="patient-reg-email">Email</label>
+                                <input type="email" id="patient-reg-email" placeholder="you@example.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ayurveda-accent">
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium ayurveda-text-dark mb-1" for="patient-reg-password">Password</label>
+                                <input type="password" id="patient-reg-password" placeholder="••••••••" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ayurveda-accent">
+                            </div>
+                            <button id="patient-register-btn" class="w-full ayurveda-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:opacity-90 transition-opacity">
+                                Register as Patient
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4 text-sm">
+                        <p id="login-prompt">Don't have an account? <a href="#" id="show-register-link" class="font-semibold ayurveda-accent-text">Sign Up</a></p>
+                        <p id="register-prompt" class="hidden">Already have an account? <a href="#" id="show-login-link" class="font-semibold ayurveda-accent-text">Log In</a></p>
+                    </div>
+
+                </div>
+                 <div class="text-center mt-4 text-sm">
+                    <a href="#" class="ayurveda-text-light hover:ayurveda-accent-text">Forgot Password?</a>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Screen: Dashboard/Patient List -->
+        <div id="dashboard-screen" class="screen fade-in">
+            <header class="p-4 ayurveda-secondary sticky top-0 z-10 shadow-sm">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-xl font-bold ayurveda-text-dark">Patients</h1>
+                    <button class="logout-btn text-sm ayurveda-accent-text font-semibold">Logout</button>
+                </div>
+                <div class="mt-4 relative">
+                    <input type="text" id="patient-search" placeholder="Search patients..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ayurveda-accent">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+                <div class="mt-3 flex space-x-2 overflow-x-auto pb-2">
+                    <button class="filter-btn bg-ayurveda-primary text-white px-4 py-1.5 rounded-full text-sm flex-shrink-0">All</button>
+                    <button class="filter-btn bg-white text-ayurveda-text-dark border border-gray-300 px-4 py-1.5 rounded-full text-sm flex-shrink-0">Active Plans</button>
+                    <button class="filter-btn bg-white text-ayurveda-text-dark border border-gray-300 px-4 py-1.5 rounded-full text-sm flex-shrink-0">New Patients</button>
+                    <button class="filter-btn bg-white text-ayurveda-text-dark border border-gray-300 px-4 py-1.5 rounded-full text-sm flex-shrink-0">Follow-up</button>
+                </div>
+            </header>
+            <main id="patient-list" class="p-4 space-y-4 pb-20">
+                <!-- Patient cards will be injected here by JS -->
+            </main>
+        </div>
+        
+        <!-- Screen: Patient Dashboard -->
+        <div id="patient-dashboard-screen" class="screen fade-in">
+            <header class="p-4 ayurveda-secondary sticky top-0 z-10 shadow-sm">
+                 <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm ayurveda-text-light">Welcome back,</p>
+                        <h1 id="patient-dashboard-name" class="text-xl font-bold ayurveda-text-dark">Ananya Sharma</h1>
+                    </div>
+                    <button class="logout-btn text-sm ayurveda-accent-text font-semibold">Logout</button>
+                </div>
+            </header>
+            <main class="p-4 space-y-5">
+                 <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <h3 class="font-semibold ayurveda-text-dark mb-3">Your Ayurvedic Profile</h3>
+                    <div class="flex justify-around text-center">
+                        <div>
+                            <p class="text-xs ayurveda-text-light">Prakriti</p>
+                            <p id="pd-prakriti" class="font-bold ayurveda-primary-text text-lg">Vata-Pitta</p>
+                        </div>
+                        <div>
+                            <p class="text-xs ayurveda-text-light">Vikriti</p>
+                            <p id="pd-vikriti" class="font-bold text-red-600 text-lg">Kapha High</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <h3 class="font-semibold ayurveda-text-dark mb-3">Today's Diet Plan</h3>
+                    <div id="patient-diet-plan-summary" class="space-y-3">
+                        <!-- Patient's diet plan will be injected here -->
+                    </div>
+                     <button class="w-full mt-4 text-sm ayurveda-accent-text font-semibold py-2 rounded-lg border border-ayurveda-accent hover:bg-ayurveda-accent hover:text-white transition-colors">View Full Chart Details</button>
+                </div>
+            </main>
+        </div>
+
+
+        <!-- Screen: Patient Profile -->
+        <div id="profile-screen" class="screen fade-in">
+             <header class="p-4 ayurveda-secondary sticky top-0 z-10 shadow-sm flex items-center space-x-4">
+                <button class="nav-btn" data-target="dashboard-screen">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ayurveda-text-dark"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                </button>
+                <h1 class="text-xl font-bold ayurveda-text-dark">Patient Profile</h1>
+            </header>
+            <main class="p-4 space-y-5 pb-24">
+                <div class="text-center">
+                    <img id="patient-avatar" src="https://placehold.co/100x100/EFEBE5/3D403A?text=AP" class="w-24 h-24 rounded-full mx-auto shadow-md">
+                    <h2 id="patient-name" class="mt-3 text-2xl font-bold ayurveda-text-dark">Ananya Sharma</h2>
+                    <p id="patient-id" class="text-sm ayurveda-text-light">Patient ID: #P1203A</p>
+                </div>
+                
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <h3 class="font-semibold ayurveda-text-dark mb-3">Ayurvedic Profile</h3>
+                    <div class="flex justify-around text-center">
+                        <div>
+                            <p class="text-xs ayurveda-text-light">Prakriti</p>
+                            <p id="patient-prakriti" class="font-bold ayurveda-primary-text text-lg">Vata-Pitta</p>
+                        </div>
+                        <div>
+                            <p class="text-xs ayurveda-text-light">Vikriti</p>
+                            <p id="patient-vikriti" class="font-bold text-red-600 text-lg">Kapha High</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <h3 class="font-semibold ayurveda-text-dark mb-3">Demographics</h3>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div><strong class="ayurveda-text-light block">Age:</strong> <span id="patient-age">28</span></div>
+                        <div><strong class="ayurveda-text-light block">Gender:</strong> <span id="patient-gender">Female</span></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <h3 class="font-semibold ayurveda-text-dark mb-3">Health Profile</h3>
+                     <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div><strong class="ayurveda-text-light block">Diet Type:</strong> <span id="patient-diet-type">Vegetarian</span></div>
+                        <div><strong class="ayurveda-text-light block">Meal Freq:</strong> <span id="patient-meal-freq">3 times/day</span></div>
+                        <div><strong class="ayurveda-text-light block">Bowel:</strong> <span id="patient-bowel">Regular</span></div>
+                        <div><strong class="ayurveda-text-light block">Water Intake:</strong> <span id="patient-water">2.5 L/day</span></div>
+                         <div><strong class="ayurveda-text-light block">Activity:</strong> <span id="patient-activity">Moderate</span></div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-semibold ayurveda-text-dark">Doctor's Notes</h3>
+                        <button id="summarize-notes-btn" class="text-xs ayurveda-accent-text font-semibold flex items-center space-x-1">
+                            <span>✨ Summarize</span>
+                        </button>
+                    </div>
+                    <p id="patient-notes" class="text-sm ayurveda-text-light">Patient reports feeling lethargic in the mornings. Complains of bloating after heavy meals. Needs a diet to balance Kapha dosha.</p>
+                    <p id="patient-notes-summary" class="text-sm ayurveda-primary-text font-semibold mt-2 p-2 bg-green-50 rounded-md border-l-4 border-green-400 hidden"></p>
+                    <div class="mt-3">
+                         <strong class="ayurveda-text-dark text-sm block">Health Goals:</strong>
+                         <p id="patient-goals" class="text-sm ayurveda-text-light">Improve digestion and increase energy levels.</p>
+                    </div>
+                </div>
+
+            </main>
+            <footer class="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200">
+                <button class="nav-btn w-full ayurveda-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:opacity-90 transition-opacity" data-target="food-db-screen">
+                    Create New Diet Plan
+                </button>
+            </footer>
+        </div>
+
+        <!-- Screen: Food Database -->
+        <div id="food-db-screen" class="screen fade-in">
+            <header class="p-4 ayurveda-secondary sticky top-0 z-10 shadow-sm">
+                <div class="flex items-center space-x-4">
+                    <button class="nav-btn" data-target="profile-screen">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ayurveda-text-dark"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    </button>
+                    <h1 class="text-xl font-bold ayurveda-text-dark">Food Database</h1>
+                </div>
+                 <div class="mt-4 relative">
+                    <input type="text" id="food-search" placeholder="Search 8,000+ food items..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ayurveda-accent">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+                <div class="mt-3">
+                     <button id="suggest-foods-btn" class="w-full bg-white text-ayurveda-accent-text border border-ayurveda-accent px-4 py-2 rounded-lg text-sm font-semibold flex items-center justify-center space-x-2">
+                        <span>✨ Suggest Foods For Patient</span>
+                    </button>
+                </div>
+            </header>
+            <main id="food-list" class="p-4 space-y-3 pb-24">
+                 <!-- AI suggestions will appear here -->
+                <div id="ai-suggestions-container" class="hidden">
+                    <h3 class="font-semibold ayurveda-text-dark text-sm mb-2">✨ AI Suggestions</h3>
+                    <div id="ai-suggestions-list" class="space-y-2"></div>
+                </div>
+                <hr id="food-list-divider" class="my-4 border-gray-200 hidden">
+                <!-- Food items will be injected here by JS -->
+            </main>
+             <footer class="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200 flex justify-between items-center">
+                <p class="text-sm font-medium ayurveda-text-dark"><span id="diet-item-count">0</span> items selected</p>
+                <button class="nav-btn ayurveda-primary text-white font-bold py-2 px-6 rounded-lg shadow-lg hover:opacity-90 transition-opacity" data-target="diet-chart-screen">
+                    View Diet Chart &rarr;
+                </button>
+            </footer>
+        </div>
+
+        <!-- Screen: Diet Chart Generation -->
+        <div id="diet-chart-screen" class="screen fade-in">
+            <header class="p-4 ayurveda-secondary sticky top-0 z-10 shadow-sm">
+                 <div class="flex items-center space-x-4 mb-4">
+                    <button class="nav-btn" data-target="food-db-screen">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ayurveda-text-dark"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    </button>
+                    <h1 class="text-xl font-bold ayurveda-text-dark">Diet Chart</h1>
+                </div>
+                 <div class="bg-white p-3 rounded-lg shadow-sm">
+                     <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-semibold text-sm ayurveda-text-dark">Scientific Nutrient Analysis</h3>
+                        <button id="generate-diet-plan-btn" class="text-xs ayurveda-accent-text font-semibold flex items-center space-x-1">
+                             <span>✨ Generate Smart Plan</span>
+                        </button>
+                    </div>
+                    <div class="w-full">
+                        <canvas id="nutrientChart" height="120"></canvas>
+                    </div>
+                </div>
+            </header>
+            <main class="p-4 space-y-6 pb-24">
+                <div id="meal-sections">
+                    <!-- Meal sections (Breakfast, Lunch, etc.) will be injected here -->
+                </div>
+            </main>
+            <footer class="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200 flex space-x-2">
+                <button class="flex-1 bg-gray-200 text-ayurveda-text-dark font-bold py-3 px-4 rounded-lg hover:bg-gray-300">Save</button>
+                <button class="flex-1 bg-gray-200 text-ayurveda-text-dark font-bold py-3 px-4 rounded-lg hover:bg-gray-300">Print</button>
+                <button class="flex-1 ayurveda-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:opacity-90">Share</button>
+            </footer>
+        </div>
+
+        <!-- Recipe View Modal -->
+        <div id="recipe-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-sm max-h-[90vh] overflow-y-auto">
+                <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white">
+                    <h2 id="recipe-modal-title" class="text-lg font-bold ayurveda-text-dark">Recipe Details</h2>
+                    <button id="close-recipe-modal">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div id="recipe-modal-content" class="p-4 space-y-4">
+                    <!-- Recipe details will be injected here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Meal Selection Modal -->
+        <div id="meal-selection-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-end justify-center">
+             <div class="bg-white rounded-t-lg shadow-xl w-full max-w-md">
+                 <div class="p-4 border-b flex justify-between items-center">
+                    <h2 id="meal-modal-title" class="text-lg font-bold ayurveda-text-dark">Add to Meal</h2>
+                    <button id="close-meal-modal">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="p-4 grid grid-cols-2 gap-4">
+                    <button data-meal="Breakfast" class="meal-select-btn w-full ayurveda-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:opacity-90 transition-opacity">Breakfast</button>
+                    <button data-meal="Lunch" class="meal-select-btn w-full ayurveda-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:opacity-90 transition-opacity">Lunch</button>
+                    <button data-meal="Snacks" class="meal-select-btn w-full ayurveda-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:opacity-90 transition-opacity">Snacks</button>
+                    <button data-meal="Dinner" class="meal-select-btn w-full ayurveda-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:opacity-90 transition-opacity">Dinner</button>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mock Data
+            const patients = [
+                { id: 1, name: 'Ananya Sharma', prakriti: 'Vata-Pitta', vikriti: 'Kapha High', status: 'Active Plan', avatar: 'https://placehold.co/80x80/D4A373/FFFFFF?text=AS', details: { age: 28, gender: 'Female', dietType: 'Vegetarian', mealFreq: '3 times/day', bowel: 'Regular', water: '2.5 L/day', activityLevel: 'Moderate', healthGoals: 'Improve digestion and increase energy levels.', notes: 'Patient reports feeling lethargic in the mornings. Complains of bloating after heavy meals. Needs a diet to balance Kapha dosha.' } },
+                { id: 2, name: 'Rohan Verma', prakriti: 'Pitta-Kapha', vikriti: 'Vata High', status: 'Follow-up', avatar: 'https://placehold.co/80x80/4A634D/FFFFFF?text=RV', details: { age: 34, gender: 'Male', dietType: 'Non-Vegetarian', mealFreq: '2 times/day', bowel: 'Irregular', water: '1.5 L/day', activityLevel: 'Low', healthGoals: 'Reduce anxiety and improve skin health.', notes: 'Experiencing anxiety and dry skin. Needs grounding and nourishing foods.' } },
+                { id: 3, name: 'Priya Desai', prakriti: 'Kapha', vikriti: 'Pitta High', status: 'New Patient', avatar: 'https://placehold.co/80x80/EFEBE5/3D403A?text=PD', details: { age: 45, gender: 'Female', dietType: 'Vegetarian', mealFreq: '3 times/day', bowel: 'Regular', water: '3 L/day', activityLevel: 'High', healthGoals: 'Manage acid reflux and skin issues.', notes: 'Complains of acid reflux and skin rashes. Needs cooling and calming diet.' } },
+                { id: 4, name: 'Sameer Khan', prakriti: 'Vata', vikriti: 'Normal', status: 'Active Plan', avatar: 'https://placehold.co/80x80/8a817c/FFFFFF?text=SK', details: { age: 29, gender: 'Male', dietType: 'Vegetarian', mealFreq: '4 times/day', bowel: 'Regular', water: '2 L/day', activityLevel: 'Moderate', healthGoals: 'Maintain current balanced state.', notes: 'General wellness check. Looking for a diet to maintain balance.' } },
+            ];
+
+            const foodItems = [
+                // Indian Cuisine
+                { id: 101, name: 'Moong Dal Khichdi', icon: '🍲', calories: 350, protein: 15, carbs: 60, fat: 5, taste: 'Madhura', property: 'Easy to digest', cuisine: 'Indian', ingredients: ['Moong Dal', 'Rice', 'Turmeric', 'Ghee'], prep: 'Cook dal and rice with spices in a pressure cooker.'},
+                { id: 106, name: 'Buttermilk (Chaas)', icon: '🥛', calories: 40, protein: 2, carbs: 3, fat: 2, taste: 'Amla', property: 'Cold', cuisine: 'Indian', ingredients: ['Yogurt', 'Water', 'Cumin Powder', 'Salt'], prep: 'Blend yogurt and water. Add spices.'},
+                { id: 201, name: 'Palak Paneer', icon: '🥘', calories: 250, protein: 18, carbs: 8, fat: 18, taste: 'Madhura', property: 'Heavy', cuisine: 'Indian', ingredients: ['Spinach', 'Paneer', 'Onion', 'Tomato', 'Spices'], prep: 'Cook spinach puree with spices and add paneer cubes.'},
+                { id: 202, name: 'Roti (Chapati)', icon: '🫓', calories: 80, protein: 3, carbs: 15, fat: 1, taste: 'Madhura', property: 'Easy to digest', cuisine: 'Indian', ingredients: ['Whole wheat flour', 'Water'], prep: 'Knead dough and cook on a hot tawa.'},
+                { id: 203, name: 'Vegetable Poha', icon: '🍚', calories: 200, protein: 4, carbs: 40, fat: 2, taste: 'Lavana', property: 'Easy to digest', cuisine: 'Indian', ingredients: ['Flattened rice', 'Onion', 'Peas', 'Turmeric'], prep: 'Sauté vegetables, add soaked poha and spices.'},
+                { id: 204, name: 'Idli with Sambar', icon: '🥣', calories: 300, protein: 10, carbs: 55, fat: 4, taste: 'Amla', property: 'Easy to digest', cuisine: 'Indian', ingredients: ['Rice batter', 'Lentils', 'Vegetables', 'Tamarind'], prep: 'Steam rice cakes and serve with lentil soup.'},
+
+                // International/Multicultural Cuisine
+                { id: 102, name: 'Apple', icon: '🍎', calories: 95, protein: 1, carbs: 25, fat: 0, taste: 'Madhura', property: 'Cold', cuisine: 'International', ingredients: ['Apple'], prep: 'Wash and eat.'},
+                { id: 103, name: 'Ginger Tea', icon: '☕', calories: 5, protein: 0, carbs: 1, fat: 0, taste: 'Katu', property: 'Hot', cuisine: 'International', ingredients: ['Ginger', 'Water', 'Honey (optional)'], prep: 'Boil grated ginger in water.'},
+                { id: 104, name: 'Almonds (soaked)', icon: '🌰', calories: 160, protein: 6, carbs: 6, fat: 14, taste: 'Madhura', property: 'Easy to digest', cuisine: 'International', ingredients: ['Almonds', 'Water'], prep: 'Soak almonds overnight.' },
+                { id: 105, name: 'Steamed Vegetables', icon: '🥦', calories: 80, protein: 5, carbs: 15, fat: 1, taste: 'Kashaya', property: 'Easy to digest', cuisine: 'International', ingredients: ['Broccoli', 'Carrots', 'Beans', 'Salt'], prep: 'Steam vegetables until tender.'},
+                { id: 301, name: 'Quinoa Salad', icon: '🥗', calories: 350, protein: 12, carbs: 40, fat: 18, taste: 'Kashaya', property: 'Easy to digest', cuisine: 'Multicultural', ingredients: ['Quinoa', 'Cucumber', 'Tomato', 'Lemon Vinaigrette'], prep: 'Mix cooked quinoa with chopped vegetables and dressing.'},
+                { id: 302, name: 'Oatmeal with Berries', icon: '🥣', calories: 250, protein: 8, carbs: 50, fat: 4, taste: 'Madhura', property: 'Easy to digest', cuisine: 'International', ingredients: ['Rolled oats', 'Water/Milk', 'Mixed berries'], prep: 'Cook oats and top with berries.'},
+                { id: 303, name: 'Hummus with Carrot Sticks', icon: '🥕', calories: 180, protein: 6, carbs: 15, fat: 10, taste: 'Kashaya', property: 'Heavy', cuisine: 'Multicultural', ingredients: ['Chickpeas', 'Tahini', 'Lemon Juice', 'Carrots'], prep: 'Serve hummus dip with fresh carrot sticks.'},
+                { id: 304, name: 'Grilled Chicken Breast', icon: '🍗', calories: 220, protein: 40, carbs: 0, fat: 5, taste: 'Madhura', property: 'Heavy', cuisine: 'International', ingredients: ['Chicken breast', 'Herbs', 'Olive oil'], prep: 'Marinate and grill chicken until cooked through.'},
+                { id: 305, name: 'Avocado Toast', icon: '🥑', calories: 280, protein: 7, carbs: 25, fat: 18, taste: 'Madhura', property: 'Heavy', cuisine: 'Multicultural', ingredients: ['Whole wheat bread', 'Avocado', 'Salt', 'Pepper'], prep: 'Toast bread and top with mashed avocado.'},
+                 // Add more diverse food items
+                { id: 401, name: 'Lentil Soup', icon: '🍲', calories: 220, protein: 12, carbs: 35, fat: 4, taste: 'Madhura', property: 'Easy to digest', cuisine: 'Multicultural', ingredients: ['Lentils', 'Carrot', 'Celery', 'Onion'], prep: 'Simmer all ingredients until lentils are soft.' },
+                { id: 402, name: 'Brown Rice', icon: '🍚', calories: 215, protein: 5, carbs: 45, fat: 2, taste: 'Madhura', property: 'Easy to digest', cuisine: 'International', ingredients: ['Brown rice', 'Water'], prep: 'Cook rice as per package instructions.' },
+                { id: 403, name: 'Tofu Stir-fry', icon: '🥡', calories: 320, protein: 20, carbs: 25, fat: 15, taste: 'Katu', property: 'Hot', cuisine: 'Multicultural', ingredients: ['Tofu', 'Broccoli', 'Bell Peppers', 'Soy Sauce'], prep: 'Stir-fry tofu and vegetables with sauce.' },
+                { id: 404, name: 'Greek Yogurt', icon: '🍦', calories: 150, protein: 15, carbs: 8, fat: 7, taste: 'Amla', property: 'Cold', cuisine: 'International', ingredients: ['Greek yogurt'], prep: 'Serve chilled, can add honey or fruits.' },
+                { id: 405, name: 'Salmon (baked)', icon: '🐟', calories: 280, protein: 30, carbs: 0, fat: 18, taste: 'Madhura', property: 'Heavy', cuisine: 'International', ingredients: ['Salmon fillet', 'Lemon', 'Dill'], prep: 'Bake salmon with lemon and herbs.' },
+                { id: 406, name: 'Miso Soup', icon: '🍜', calories: 60, protein: 4, carbs: 5, fat: 2, taste: 'Lavana', property: 'Hot', cuisine: 'Multicultural', ingredients: ['Miso paste', 'Tofu', 'Seaweed'], prep: 'Dissolve miso paste in hot water, add tofu and seaweed.' },
+                { id: 407, name: 'Banana', icon: '🍌', calories: 105, protein: 1, carbs: 27, fat: 0, taste: 'Madhura', property: 'Heavy', cuisine: 'International', ingredients: ['Banana'], prep: 'Peel and eat.'},
+                { id: 408, name: 'Green Smoothie', icon: '🥤', calories: 180, protein: 4, carbs: 35, fat: 2, taste: 'Kashaya', property: 'Cold', cuisine: 'International', ingredients: ['Spinach', 'Banana', 'Almond Milk'], prep: 'Blend all ingredients until smooth.'},
+            ];
+
+            let dietChart = {};
+            let selectedPatient = null;
+            let chartInstance = null;
+            let loggedInPatient = null;
+            let foodIdToAdd = null;
+
+            // DOM Elements
+            const screens = document.querySelectorAll('.screen');
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const patientListContainer = document.getElementById('patient-list');
+            const foodListContainer = document.getElementById('food-list');
+            const mealSelectionModal = document.getElementById('meal-selection-modal');
+            
+            // --- Gemini API Integration ---
+            async function callGeminiAPI(prompt, isJson = false) {
+                const apiKey = ""; // Leave empty, handled by environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                };
+                if(isJson){
+                     payload.generationConfig = {
+                        responseMimeType: "application/json",
+                     }
+                }
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API call failed with status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        throw new Error("Invalid response structure from API.");
+                    }
+                } catch (error) {
+                    console.error("Gemini API Error:", error);
+                    return null;
+                }
+            }
+
+
+            // --- Navigation ---
+            function navigateTo(screenId) {
+                screens.forEach(s => s.classList.remove('active'));
+                const targetScreen = document.getElementById(screenId);
+                if (targetScreen) {
+                    targetScreen.classList.add('active');
+                    targetScreen.scrollTop = 0; // Scroll to top on screen change
+                }
+            }
+
+            navButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.dataset.target;
+                    if (target) navigateTo(target);
+                });
+            });
+
+            // --- Login & Registration Logic ---
+            const doctorTab = document.getElementById('doctor-tab');
+            const patientTab = document.getElementById('patient-tab');
+            const doctorLoginForm = document.getElementById('doctor-login-form');
+            const patientLoginForm = document.getElementById('patient-login-form');
+            const doctorRegisterForm = document.getElementById('doctor-register-form');
+            const patientRegisterForm = document.getElementById('patient-register-form');
+            const loginFormsContainer = document.getElementById('login-forms');
+            const registerFormsContainer = document.getElementById('register-forms');
+            const showRegisterLink = document.getElementById('show-register-link');
+            const showLoginLink = document.getElementById('show-login-link');
+            const loginPrompt = document.getElementById('login-prompt');
+            const registerPrompt = document.getElementById('register-prompt');
+            let isPatientTabActive = false;
+
+            function updateFormVisibility() {
+                doctorLoginForm.classList.toggle(!isPatientTabActive);
+                patientLoginForm.classList.toggle(isPatientTabActive);
+                doctorRegisterForm.classList.toggle(!isPatientTabActive);
+                patientRegisterForm.classList.toggle(isPatientTabActive);
+            }
+
+            doctorTab.addEventListener('click', () => {
+                doctorTab.classList.add('active');
+                patientTab.classList.remove('active');
+                isPatientTabActive = false;
+                updateFormVisibility();
+            });
+
+            patientTab.addEventListener('click', () => {
+                patientTab.classList.add('active');
+                doctorTab.classList.remove('active');
+                isPatientTabActive = true;
+                updateFormVisibility();
+            });
+
+            showRegisterLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginFormsContainer.classList.add('hidden');
+                registerFormsContainer.classList.remove('hidden');
+                loginPrompt.classList.add('hidden');
+                registerPrompt.classList.remove('hidden');
+                isPatientTabActive = !doctorTab.classList.contains('active');
+                updateFormVisibility();
+            });
+
+            showLoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                registerFormsContainer.classList.add('hidden');
+                loginFormsContainer.classList.remove('hidden');
+                registerPrompt.classList.add('hidden');
+                loginPrompt.classList.remove('hidden');
+                isPatientTabActive = !doctorTab.classList.contains('active');
+                updateFormVisibility();
+            });
+            
+            document.getElementById('doctor-login-btn').addEventListener('click', () => {
+                navigateTo('dashboard-screen');
+            });
+
+             document.getElementById('doctor-register-btn').addEventListener('click', () => {
+                alert('Doctor account created (simulation). Logging in.');
+                navigateTo('dashboard-screen');
+            });
+            
+            document.getElementById('patient-login-btn').addEventListener('click', () => {
+                loggedInPatient = patients[0];
+                renderPatientDashboard(loggedInPatient);
+                navigateTo('patient-dashboard-screen');
+            });
+
+            document.getElementById('patient-register-btn').addEventListener('click', () => {
+                const name = document.getElementById('patient-reg-name').value;
+                if (!name) {
+                    alert('Please enter a name.');
+                    return;
+                }
+                const newPatient = {
+                    id: patients.length + 1,
+                    name: name,
+                    prakriti: 'Vata',
+                    vikriti: 'Normal',
+                    status: 'New Patient',
+                    avatar: `https://placehold.co/80x80/EFEBE5/3D403A?text=${name.charAt(0).toUpperCase()}`,
+                    details: { age: 30, gender: 'Female', dietType: 'Vegetarian', mealFreq: '3 times/day', bowel: 'Regular', water: '2L/day', activityLevel: 'Moderate', healthGoals: 'General wellness.', notes: 'Newly registered patient.' }
+                };
+                patients.push(newPatient);
+                loggedInPatient = newPatient;
+                renderPatientDashboard(loggedInPatient);
+                navigateTo('patient-dashboard-screen');
+            });
+            
+            document.querySelectorAll('.logout-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    loggedInPatient = null;
+                    selectedPatient = null;
+                    navigateTo('login-screen');
+                });
+            });
+
+            // --- Patient Dashboard ---
+            function renderPatientDashboard(patient) {
+                if(patient){
+                    document.getElementById('patient-dashboard-name').textContent = patient.name;
+                    document.getElementById('pd-prakriti').textContent = patient.prakriti;
+                    document.getElementById('pd-vikriti').textContent = patient.vikriti;
+                    
+                    const dietPlanHtml = `
+                        <div>
+                            <p class="font-semibold text-sm ayurveda-primary-text">Breakfast</p>
+                            <p class="text-sm ayurveda-text-light">Oatmeal with Berries, Ginger Tea</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-sm ayurveda-primary-text">Lunch</p>
+                            <p class="text-sm ayurveda-text-light">Quinoa Salad, Buttermilk</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-sm ayurveda-primary-text">Snacks</p>
+                            <p class="text-sm ayurveda-text-light">Apple, Soaked Almonds</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-sm ayurveda-primary-text">Dinner</p>
+                            <p class="text-sm ayurveda-text-light">Moong Dal Khichdi, Steamed Vegetables</p>
+                        </div>`;
+                    document.getElementById('patient-diet-plan-summary').innerHTML = dietPlanHtml;
+                }
+            }
+
+
+            // --- Patient List ---
+            function renderPatients(filteredPatients = patients) {
+                patientListContainer.innerHTML = '';
+                filteredPatients.forEach(p => {
+                    const patientCard = document.createElement('div');
+                    patientCard.className = 'bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4 cursor-pointer hover:shadow-md transition-shadow';
+                    patientCard.innerHTML = `
+                        <img src="${p.avatar}" alt="${p.name}" class="w-16 h-16 rounded-full flex-shrink-0">
+                        <div class="flex-1">
+                            <h3 class="font-semibold ayurveda-text-dark">${p.name}</h3>
+                            <p class="text-sm ayurveda-text-light">Prakriti: ${p.prakriti}</p>
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full ${p.status === 'Active Plan' ? 'bg-green-100 text-green-800' : p.status === 'Follow-up' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}">${p.status}</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ayurveda-text-light"><polyline points="9 18 15 12 9 6"/></svg>
+                    `;
+                    patientCard.addEventListener('click', () => showPatientProfile(p.id));
+                    patientListContainer.appendChild(patientCard);
+                });
+            }
+            
+            // --- Patient Profile ---
+            function showPatientProfile(patientId) {
+                selectedPatient = patients.find(p => p.id === patientId);
+                if (selectedPatient) {
+                    document.getElementById('patient-avatar').src = selectedPatient.avatar;
+                    document.getElementById('patient-name').textContent = selectedPatient.name;
+                    document.getElementById('patient-id').textContent = `Patient ID: #P${1202 + selectedPatient.id}A`;
+                    document.getElementById('patient-prakriti').textContent = selectedPatient.prakriti;
+                    document.getElementById('patient-vikriti').textContent = selectedPatient.vikriti;
+                    document.getElementById('patient-age').textContent = selectedPatient.details.age;
+                    document.getElementById('patient-gender').textContent = selectedPatient.details.gender;
+                    document.getElementById('patient-diet-type').textContent = selectedPatient.details.dietType;
+                    document.getElementById('patient-meal-freq').textContent = selectedPatient.details.mealFreq;
+                    document.getElementById('patient-bowel').textContent = selectedPatient.details.bowel;
+                    document.getElementById('patient-water').textContent = selectedPatient.details.water;
+                    document.getElementById('patient-activity').textContent = selectedPatient.details.activityLevel;
+                    document.getElementById('patient-goals').textContent = selectedPatient.details.healthGoals;
+                    document.getElementById('patient-notes').textContent = selectedPatient.details.notes;
+                    document.getElementById('patient-notes-summary').classList.add('hidden');
+                    document.getElementById('patient-notes-summary').textContent = '';
+                    navigateTo('profile-screen');
+                }
+            }
+            
+            // --- Gemini Feature: Summarize Notes ---
+            document.getElementById('summarize-notes-btn').addEventListener('click', async (e) => {
+                const button = e.currentTarget;
+                const summaryEl = document.getElementById('patient-notes-summary');
+                if (!selectedPatient || summaryEl.textContent) return;
+
+                const originalText = button.innerHTML;
+                button.innerHTML = `<div class="spinner"></div>`;
+                button.disabled = true;
+
+                const prompt = `Summarize the following patient notes into a single, concise sentence: "${selectedPatient.details.notes}"`;
+                const summary = await callGeminiAPI(prompt);
+
+                if (summary) {
+                    summaryEl.textContent = summary;
+                    summaryEl.classList.remove('hidden');
+                } else {
+                    summaryEl.textContent = 'Could not generate summary.';
+                    summaryEl.classList.remove('hidden');
+                }
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+
+            // --- Food Database & Meal Selection ---
+            function renderFoodItems(filteredFoods = foodItems) {
+                const container = document.getElementById('food-list');
+                const existingCards = container.querySelectorAll('.food-item-card');
+                existingCards.forEach(card => card.remove());
+
+                filteredFoods.forEach(food => {
+                    const isAdded = Object.values(dietChart).flat().some(item => item.id === food.id);
+                    const foodCard = document.createElement('div');
+                    foodCard.className = 'food-item-card bg-white p-3 rounded-lg shadow-sm flex items-center space-x-4';
+                    foodCard.innerHTML = `
+                        <div class="text-3xl">${food.icon}</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold ayurveda-text-dark">${food.name}</h3>
+                            <p class="text-xs ayurveda-text-light">${food.calories} kcal | P:${food.protein}g C:${food.carbs}g F:${food.fat}g</p>
+                        </div>
+                        <button class="add-food-btn ${isAdded ? 'bg-gray-200 text-gray-500' : 'ayurveda-accent text-white'} w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl transition-colors" data-food-id="${food.id}">
+                           ${isAdded ? '✓' : '+'}
+                        </button>
+                    `;
+                    container.appendChild(foodCard);
+                });
+                attachAddFoodListeners();
+            }
+
+            function attachAddFoodListeners() {
+                document.querySelectorAll('.add-food-btn').forEach(btn => {
+                    btn.replaceWith(btn.cloneNode(true));
+                });
+                document.querySelectorAll('.add-food-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const foodId = parseInt(e.currentTarget.dataset.foodId);
+                        let isAdded = false;
+                        let mealOfItem = '';
+
+                        for (const meal in dietChart) {
+                            if (dietChart[meal].some(item => item.id === foodId)) {
+                                isAdded = true;
+                                mealOfItem = meal;
+                                break;
+                            }
+                        }
+
+                        if (isAdded) {
+                            dietChart[mealOfItem] = dietChart[mealOfItem].filter(item => item.id !== foodId);
+                            updateAllUIs();
+                        } else {
+                            foodIdToAdd = foodId;
+                            showMealSelectionModal();
+                        }
+                    });
+                });
+            }
+
+            function showMealSelectionModal() {
+                mealSelectionModal.classList.remove('hidden');
+                mealSelectionModal.classList.add('flex');
+            }
+
+            function hideMealSelectionModal() {
+                mealSelectionModal.classList.add('hidden');
+                mealSelectionModal.classList.remove('flex');
+            }
+
+            document.querySelectorAll('.meal-select-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const mealName = e.currentTarget.dataset.meal;
+                    const food = foodItems.find(f => f.id === foodIdToAdd);
+                    if (food) {
+                        if (!dietChart[mealName]) {
+                            dietChart[mealName] = [];
+                        }
+                        dietChart[mealName].push(food);
+                        foodIdToAdd = null;
+                        hideMealSelectionModal();
+                        updateAllUIs();
+                    }
+                });
+            });
+            
+            document.getElementById('close-meal-modal').addEventListener('click', hideMealSelectionModal);
+
+
+            // --- Gemini Feature: Suggest Foods ---
+            document.getElementById('suggest-foods-btn').addEventListener('click', async (e) => {
+                const button = e.currentTarget;
+                if (!selectedPatient) {
+                    alert("Please select a patient first.");
+                    return;
+                }
+
+                const originalText = button.innerHTML;
+                button.innerHTML = `<div class="spinner mr-2"></div> Generating...`;
+                button.disabled = true;
+
+                const prompt = `You are an expert Ayurvedic dietitian. Suggest 5 simple food items or recipes suitable for a patient with this profile: Prakriti: ${selectedPatient.prakriti}, Vikriti: ${selectedPatient.vikriti}, Health Goals: ${selectedPatient.details.healthGoals}, Notes: ${selectedPatient.details.notes}. Respond ONLY with a JSON array of objects in this format: \`[{"name": "Recipe Name", "icon": "🥗", "reason": "Briefly why it's good"}]\`.`;
+                
+                const responseText = await callGeminiAPI(prompt, true);
+                
+                if (responseText) {
+                    try {
+                        const suggestions = JSON.parse(responseText);
+                        const container = document.getElementById('ai-suggestions-list');
+                        container.innerHTML = '';
+                        suggestions.forEach(s => {
+                            const suggestionCard = document.createElement('div');
+                            suggestionCard.className = 'bg-yellow-50 p-3 rounded-lg border border-yellow-200';
+                            suggestionCard.innerHTML = `
+                                <div class="flex items-center space-x-3">
+                                    <div class="text-2xl">${s.icon}</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold ayurveda-text-dark text-sm">${s.name}</h4>
+                                        <p class="text-xs text-yellow-800">${s.reason}</p>
+                                    </div>
+                                </div>
+                            `;
+                            container.appendChild(suggestionCard);
+                        });
+                        document.getElementById('ai-suggestions-container').classList.remove('hidden');
+                        document.getElementById('food-list-divider').classList.remove('hidden');
+                    } catch (err) {
+                        console.error("Failed to parse AI suggestions:", err);
+                        alert("Could not understand the AI's suggestions.");
+                    }
+                } else {
+                    alert("Failed to get suggestions from AI.");
+                }
+
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+
+            function updateDietItemCount() {
+                const count = Object.values(dietChart).flat().length;
+                document.getElementById('diet-item-count').textContent = count;
+            }
+
+            function updateAllUIs() {
+                updateDietItemCount();
+                renderDietChart();
+                renderFoodItems(foodItems); // To update add/remove button states
+            }
+            
+            // --- Gemini Feature: Generate Diet Plan ---
+            document.getElementById('generate-diet-plan-btn').addEventListener('click', async (e) => {
+                 const button = e.currentTarget;
+                if (!selectedPatient) {
+                    alert("Please select a patient first.");
+                    return;
+                }
+                const currentFoodSelection = Object.values(dietChart).flat();
+                if (currentFoodSelection.length === 0) {
+                    alert("Please select some food items first to generate a plan.");
+                    return;
+                }
+                const foodNames = currentFoodSelection.map(f => `"${f.name}" with icon "${f.icon}"`).join(', ');
+
+                const originalText = button.innerHTML;
+                button.innerHTML = `<div class="spinner"></div>`;
+                button.disabled = true;
+
+                const prompt = `You are an expert Ayurvedic dietitian. A patient has the following profile: Prakriti: ${selectedPatient.prakriti}, Vikriti: ${selectedPatient.vikriti}, Health Goals: "${selectedPatient.details.healthGoals}". Based on this, create a nutritionally balanced one-day diet plan (Breakfast, Lunch, Snacks, Dinner) using ONLY the following food items: ${foodNames}. Distribute them logically across the meals to meet the patient's goals. Respond ONLY with a JSON object in this format: \`{"Breakfast": [{"name": "Food Name", "icon": "🍲"}], "Lunch": [], "Snacks": [], "Dinner": []}\`. Ensure the icon from the provided list is used for each food. If a meal should be empty, provide an empty array [].`;
+
+                const responseText = await callGeminiAPI(prompt, true);
+                if (responseText) {
+                    try {
+                        const plan = JSON.parse(responseText);
+                        const newDietChart = {};
+                        const meals = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
+                        meals.forEach(meal => {
+                            newDietChart[meal] = [];
+                            if (plan[meal]) {
+                                plan[meal].forEach(planItem => {
+                                    const fullItem = foodItems.find(fi => fi.name === planItem.name);
+                                    if (fullItem) {
+                                        newDietChart[meal].push(fullItem);
+                                    }
+                                });
+                            }
+                        });
+                        dietChart = newDietChart;
+                        updateAllUIs();
+                    } catch(err) {
+                        console.error("Failed to parse AI plan:", err);
+                        alert("Could not understand the AI's generated plan.");
+                    }
+                } else {
+                    alert("Failed to generate a diet plan from AI.");
+                }
+
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+
+            // --- Diet Chart ---
+            function renderDietChart() {
+                const mealSectionsContainer = document.getElementById('meal-sections');
+                mealSectionsContainer.innerHTML = '';
+                const meals = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
+
+                meals.forEach(mealName => {
+                    const mealDiv = document.createElement('div');
+                    mealDiv.className = 'bg-white p-4 rounded-lg shadow-sm';
+                    const items = dietChart[mealName] || [];
+                    
+                    let itemsHtml = items.map(item => `
+                        <div class="flex items-center justify-between py-2 border-b last:border-b-0" data-food-id="${item.id}">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-2xl">${item.icon}</span>
+                                <div>
+                                    <p class="font-medium ayurveda-text-dark">${item.name}</p>
+                                    <p class="text-xs ayurveda-text-light">${item.calories} kcal</p>
+                                </div>
+                            </div>
+                            <div>
+                                <button class="view-recipe-btn text-xs ayurveda-accent-text font-semibold" data-food-id="${item.id}">View</button>
+                                <button class="remove-item-btn text-red-500 ml-2" data-meal="${mealName}" data-food-id="${item.id}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    if (items.length === 0) {
+                        itemsHtml = `<p class="text-sm text-center ayurveda-text-light py-4">No items added. Go back to add food.</p>`;
+                    }
+
+                    mealDiv.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-lg font-bold ayurveda-primary-text">${mealName}</h3>
+                            <p class="text-sm font-semibold ayurveda-text-dark">${items.reduce((acc, item) => acc + item.calories, 0)} kcal</p>
+                        </div>
+                        <div class="space-y-2">
+                            ${itemsHtml}
+                        </div>
+                    `;
+                    mealSectionsContainer.appendChild(mealDiv);
+                });
+
+                attachDietChartListeners();
+                updateNutrientChart();
+            }
+            
+            function attachDietChartListeners() {
+                document.querySelectorAll('.remove-item-btn').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        const foodId = parseInt(e.currentTarget.dataset.foodId);
+                        const mealName = e.currentTarget.dataset.meal;
+                        dietChart[mealName] = dietChart[mealName].filter(item => item.id !== foodId);
+                        updateAllUIs();
+                    });
+                });
+                document.querySelectorAll('.view-recipe-btn').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        const foodId = parseInt(e.currentTarget.dataset.foodId);
+                        showRecipeModal(foodId);
+                    });
+                });
+            }
+
+            // --- Nutrient Chart ---
+            function updateNutrientChart() {
+                const ctx = document.getElementById('nutrientChart').getContext('2d');
+                const allItems = Object.values(dietChart).flat();
+                
+                const totals = allItems.reduce((acc, item) => {
+                    acc.protein += item.protein;
+                    acc.carbs += item.carbs;
+                    acc.fat += item.fat;
+                    return acc;
+                }, { protein: 0, carbs: 0, fat: 0 });
+                
+                const data = {
+                    labels: [`Protein (${totals.protein.toFixed(1)}g)`, `Carbs (${totals.carbs.toFixed(1)}g)`, `Fat (${totals.fat.toFixed(1)}g)`],
+                    datasets: [{
+                        label: 'Macronutrients',
+                        data: [totals.protein, totals.carbs, totals.fat],
+                        backgroundColor: [
+                            'rgba(74, 99, 77, 0.8)',  // Green
+                            'rgba(212, 163, 115, 0.8)', // Gold
+                            'rgba(173, 161, 148, 0.8)'  // Brownish-grey
+                        ],
+                        borderColor: [
+                            '#FFFFFF',
+                            '#FFFFFF',
+                            '#FFFFFF'
+                        ],
+                        borderWidth: 2
+                    }]
+                };
+
+                if (chartInstance) {
+                    chartInstance.data = data;
+                    chartInstance.update();
+                } else {
+                    chartInstance = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: data,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        boxWidth: 12,
+                                        font: { size: 11 },
+                                        padding: 15,
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Macronutrient Distribution',
+                                    font: { size: 12 },
+                                    color: '#6B7280',
+                                    padding: {
+                                        bottom: 5
+                                    }
+                                }
+                            },
+                            cutout: '60%'
+                        }
+                    });
+                }
+            }
+            
+            // --- Recipe Modal ---
+            const recipeModal = document.getElementById('recipe-modal');
+            
+            function showRecipeModal(foodId) {
+                const food = foodItems.find(f => f.id === foodId);
+                if (food) {
+                    document.getElementById('recipe-modal-title').textContent = food.name;
+                    const macrosHtml = `P: ${food.protein}g • C: ${food.carbs}g • F: ${food.fat}g`;
+                    document.getElementById('recipe-modal-content').innerHTML = `
+                        <div class="text-center text-5xl mb-2">${food.icon}</div>
+                        <div class="text-center mb-4">
+                            <p class="font-bold text-lg ayurveda-text-dark">${food.calories} kcal</p>
+                            <p class="text-sm ayurveda-text-light">${macrosHtml}</p>
+                        </div>
+
+                        <div>
+                            <h4 class="font-semibold ayurveda-text-dark">Ayurvedic Properties</h4>
+                            <div class="flex space-x-4 text-sm mt-1">
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded">${food.taste}</span>
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">${food.property}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold ayurveda-text-dark">Ingredients</h4>
+                            <ul class="list-disc list-inside text-sm ayurveda-text-light mt-1">
+                                ${food.ingredients.map(i => `<li>${i}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold ayurveda-text-dark">Preparation</h4>
+                            <p class="text-sm ayurveda-text-light mt-1">${food.prep}</p>
+                        </div>
+                    `;
+                    recipeModal.classList.remove('hidden');
+                    recipeModal.classList.add('flex');
+                }
+            }
+            
+            document.getElementById('close-recipe-modal').addEventListener('click', () => {
+                recipeModal.classList.add('hidden');
+                recipeModal.classList.remove('flex');
+            });
+             recipeModal.addEventListener('click', (e) => {
+                if(e.target === recipeModal) {
+                    recipeModal.classList.add('hidden');
+                    recipeModal.classList.remove('flex');
+                }
+            });
+
+
+            // --- Search and Filter ---
+            document.getElementById('patient-search').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = patients.filter(p => p.name.toLowerCase().includes(searchTerm));
+                renderPatients(filtered);
+            });
+
+            document.getElementById('food-search').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = foodItems.filter(f => f.name.toLowerCase().includes(searchTerm));
+                renderFoodItems(filtered);
+            });
+            
+            // --- Initial Load ---
+            updateFormVisibility();
+            renderPatients();
+            renderFoodItems();
+            renderDietChart();
+        });
+    </script>
+</body>
+</html>
+
